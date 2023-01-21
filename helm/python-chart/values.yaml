@@ -1,0 +1,32 @@
+appname:
+  name: "devopsbootcamp-app"
+
+deployment:
+  image: "iesodias/bootcampapp"
+  tag: "latest"
+  replicas: 2
+  startupProbe: #Quanto tempo precisa para ficar iniciar os tes
+    httpGet:
+      path: /bootcamp/app1/success
+      port: 5000
+    periodSeconds: 3
+    failureThreshold: 30
+  readinessProbe: 
+    httpGet:
+      path: /bootcamp/app1/success
+      port: 5000
+    periodSeconds: 3
+    failureThreshold: 1
+  livenessProbe:
+    httpGet:
+      path: /bootcamp/app1/success
+      port: 5000
+
+ingress:
+  path: "/bootcamp/app1/"
+
+hpa:
+  minReplicas: 3
+  maxReplicas: 6
+  averageUtilization: 15
+

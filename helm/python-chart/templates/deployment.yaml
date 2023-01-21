@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appname.name }}
+  namespace: {{ .Values.appname.name }}
+  labels:
+    app: {{ .Values.appname.name }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.appname.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appname.name }}
+    spec:
+      containers:
+        - name: {{ .Values.appname.name }}
+          image: {{ .Values.deployment.image}}:{{ .Values.deployment.tag}}
+          ports:
+            - containerPort: 5000
+          resources:
+          startupProbe:
+            httpGet:
+              path: {{ .Values.deployment.startupProbe.httpGet.path }}
+              port: {{ .Values.deployment.startupProbe.httpGet.port }}
+            periodSeconds: {{ .Values.deployment.startupProbe.httpGet.periodSeconds }}
+            failureThreshold: {{ .Values.deployment.startupProbe.httpGet.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.deployment.readinessProbe.httpGet.path }}
+              port: {{ .Values.deployment.readinessProbe.httpGet.port }}
+            periodSeconds: {{ .Values.deployment.readinessProbe.httpGet.periodSeconds }}
+            failureThreshold: {{ .Values.deployment.readinessProbe.httpGet.failureThreshold }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.deployment.livenessProbe.httpGet.path }}
+              port: {{ .Values.deployment.livenessProbe.httpGet.port }}
