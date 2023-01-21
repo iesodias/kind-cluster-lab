@@ -10,4 +10,4 @@ spec:
     app: devopsbootcamp-app
   ports:
     - port: 80
-      targetPort: 80
+      targetPort: 5000

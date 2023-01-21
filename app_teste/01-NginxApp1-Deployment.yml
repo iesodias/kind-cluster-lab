@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: devopsbootcamp-app
-          image: iesodias/flaskdocker:latest
+          image: iesodias/bootcampapp:latest
           ports:
             - containerPort: 5000
