@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: devopsbootcamp-app
+  labels:
+    app: devopsbootcamp-app
+spec:
+  type: ClusterIP
+  selector:
+    app: devopsbootcamp-app
+  ports:
+    - port: 80
+      targetPort: 80

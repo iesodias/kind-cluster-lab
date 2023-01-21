@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devopsbootcamp-app
+  labels:
+    app: devopsbootcamp-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devopsbootcamp-app
+  template:
+    metadata:
+      labels:
+        app: devopsbootcamp-app
+    spec:
+      containers:
+        - name: devopsbootcamp-app
+          image: iesodias/flaskdocker:latest
+          ports:
+            - containerPort: 5000
