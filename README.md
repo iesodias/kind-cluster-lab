@@ -49,6 +49,14 @@ Time zone ref
 https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 ```
 
+---
+
+Install app on K8S
+
+```
+kubectl apply -f /app_teste
+```
+
 ### Ref:
 - https://dustinspecker.com/posts/test-ingress-in-kind/
 - https://docs.flagger.app/tutorials/nginx-progressive-delivery
