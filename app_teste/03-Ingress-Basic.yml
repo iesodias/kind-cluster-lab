@@ -2,6 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: devopsbootcamp-app
+  namespace: devopsbootcamp-app
   annotations:
     kubernetes.io/ingress.class: nginx
 spec:  

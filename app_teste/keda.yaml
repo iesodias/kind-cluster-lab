@@ -1,0 +1,15 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: cron-scaledobject
+  namespace: devopsbootcamp-app
+spec:
+  scaleTargetRef:
+    name: devopsbootcamp-app
+  triggers:
+  - type: cron
+    metadata:
+      timezone: America/Sao_Paulo
+      start: 35 11 22 1 0
+      end: 45 11 22 1 0
+      desiredReplicas: "10"

@@ -1,0 +1,6 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: devopsbootcamp-app
+  labels:
+    name: devopsbootcamp-app
