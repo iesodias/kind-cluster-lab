@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: awh
+  labels:
+    admission-webhook: enabled
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: awh
+  namespace: awh
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: awh
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: awh
+    spec:
+      containers:
+        - image: iesodias/webhook:latest
+          name: awh
+          ports:
+            - containerPort: 5000
+              name: awh-web-svc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: awh-service
+spec:
+  selector:
+    app.kubernetes.io/name: awh
+  ports:
+    - name: awh-port
+      protocol: TCP
+      port: 443
+      targetPort: awh-web-svc
+  type: ClusterIP
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: "awh-service.awh.svc.cluster.local"
+webhooks:
+  - name: "awh-service.awh.svc.cluster.local"
+    admissionReviewVersions: [ "v1" ]
+    sideEffects: None
+#    timeoutSeconds: 5
+    namespaceSelector:
+      matchLabels:
+        admission-webhook: enabled
+    rules:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        operations: ["CREATE","UPDATE"]
+        resources: ["pods","deployments"]
+        scope: "*"
+    clientConfig:
+      service:
+        namespace: awh
+        name: awh-service
+        path: /validate/pods
+        port: 443
+      caBundle: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUREakNDQWZZQ0NRRGRGdmJleStlSmNUQU5CZ2txaGtpRzl3MEJBUVVGQURBOU1Rc3dDUVlEVlFRR0V3SmkKY2pFTE1Ba0dBMVVFQ0F3Q2JXY3hEVEFMQmdOVkJBY01CR05wZEhreEVqQVFCZ05WQkFNTUNXeHZZMkZzYUc5egpkREFlRncweU16QXlNRFl5TURFMU1ESmFGdzB5TkRBeU1EWXlNREUxTURKYU1GVXhDekFKQmdOVkJBWVRBbUp5Ck1Rc3dDUVlEVlFRSURBSnRaekVOTUFzR0ExVUVCd3dFWTJsMGVURXFNQ2dHQTFVRUF3d2hZWGRvTFhObGNuWnAKWTJVdVlYZG9Mbk4yWXk1amJIVnpkR1Z5TG14dlkyRnNNSUlCSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QQpNSUlCQ2dLQ0FRRUErd0wvVWhQM2ZEcXVqS0xhbUk0cEpmbWlQaEl2U2RoaGk1NUV6NFBETjZ3Q3BDTytNenIyCnZkdkxWVzF5dXRNQlZialRPKytLVnA3WUdqMHE0RFJ4T2NFZ1hoWlFyMlpTaHFCOWRoaGEvMjM0RGEwcUVUQmwKclc5S3ErRU1YcjN3TFhRcjR2dnFxK2ZQend2dFJROTlRS1Z5dXQ1TWZTQ1NMOHg3NFJ2ekxJT0FmVCszZ2lXagpWUHB2NWc2clNLY0VwcnhUT3Q2TW9rVjZwL2VBZi9hbnc5ZmJjKzdvRXA0ejl5a1RobTR5ZXcxQ0hzaE5scm9SCjU0RWJONkl1cnhCQ1J2dXRHOWk0YXY1NDlyVVB6aWk5T3l1Q2xXYWJsbWMwRnpOUDJWNVdoZ0lta3NCL1lMcEYKMURadForNlpOVDlmMFJEMDZRM2ZHWlY1YUU4YzZMaWtKd0lEQVFBQk1BMEdDU3FHU0liM0RRRUJCUVVBQTRJQgpBUUM5NGdBYktMeDFZaUNwRVBDSjN1b1BaOU1LZE9YT1VJZXVQTW9BZ3dPTWpwaDJsVFM0TW1wNFRsekM1bnNICktUVWpHcnVMaVlJYzdFYVdRMmRmdDkrZ2lSeE9GM0ZKaFh0eVJpZkh6L0Uza0E2QkNqNktaalZ1dDJhdjR2Vm8Kdm1sQmVOekdxOGF5MGN6Y3RVdE5vYy84cjBwdVYrd1JXWU8rUStTTGVOTEJPMEMrblFtdEJDaGlMb3M5WFZraQp1WkxXTmprV0ZWay96MVBNQnh6YWRzNHUvdzhPREJVZXRtbm1wb09Ba3NYRXNKRnRvSXJSYXE2dC9ZZm1aN3k0Cm1LZ1hBREFOTnlwaTErV3EvNHZTOVNHeTdnWm91bTR6NFBRYzd0UWtDM0duRXpQV0VjSyt4Q3dGdGE4VFFxMXcKdkFEQ0lNRHdjNWJraCtZQWxvWERpOU1VCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0KLS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM5akNDQWQ0Q0NRQ09lZUwxY1ZnNE1EQU5CZ2txaGtpRzl3MEJBUXNGQURBOU1Rc3dDUVlEVlFRR0V3SmkKY2pFTE1Ba0dBMVVFQ0F3Q2JXY3hEVEFMQmdOVkJBY01CR05wZEhreEVqQVFCZ05WQkFNTUNXeHZZMkZzYUc5egpkREFlRncweU16QXlNRFl5TURBNE5EbGFGdzB5TkRBeU1EWXlNREE0TkRsYU1EMHhDekFKQmdOVkJBWVRBbUp5Ck1Rc3dDUVlEVlFRSURBSnRaekVOTUFzR0ExVUVCd3dFWTJsMGVURVNNQkFHQTFVRUF3d0piRzlqWVd4b2IzTjAKTUlJQklqQU5CZ2txaGtpRzl3MEJBUUVGQUFPQ0FROEFNSUlCQ2dLQ0FRRUEzMDFqdWxMMmF6d25IY2JQc0N1dwp3NWhtVGVSTVdMZFRnSDgwWklkOHYxbytvaEtIdG1tVEtVVFNRd1lqd2xiMHpCTXdOcnV4d1hLNEdLdkxFMm9UCjJtUUJlUjVzbzVrZys1cW5scXNkRzBCWUw2UG40ZFJ1MENYMjdXYXl4aWJQNE03K3pjb1BHSHBVOXlIeEkxRkkKbER2TGlOVSt0L0dpY3RUZ3MybmQ3TGF2dVJDVWpHNUFmN1JoVjRxc1g0bVZBZFZrbjNNV1NJaVdUMXBUREpjQQp0dzdKTFl0a1o2cTdqem5FNm83TExGL04rUXNWMG5PUXNHU0cxeXJHOUJaZys4Q3pBNjVpUEZsendVM09CTkFSCm02Z0J3aDBjdnhLcVNHQTN0czNkK2N4NHRyMVlScDJnU2NtbW0zbmtBTmpOMFJzSlJYaFJSa0xMWndOK1dGYVgKR3dJREFRQUJNQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUUNmNHpmMXh3RjZYM0xoN3dkMmZwQ3gycFJuN1U4KwpkbklBbnJBcU4rUXgrdlNhSEN4OUF1Ym1WL0pwZkF0WFRwVXZjc2JJRm5ET0NBQWIxb3J2QTgwODNBOS9mdmFkClE0emdyRkQwS2RPZzVXcGJvMHI5U3BuM3VHK1cxRWRDRmUzNGZmcVloSm9WZmxXV0t4b2pObW5LZTZYRWY0RWEKVkk4eFNLOUs2NTJneHhwL3JRbDNLMG5EbnhpakYvZ0FhME5tRkVvUHZMbU01QVFlTW1zN1c5bHp1S016ZEtlYgo3bWg5NmY4SnJHQnpveElkcEVKSXFITWlqNmxYcjlqSEpUQlhDNjVoek5aejNVSEdoU2hKR1d1dmtNeXdidEZqCmhTMnptWmdNbDFiTTZsbUdJbS9zR0pTekFqbUtRQTVmWWRzRFBsc3JBREZkd2M2SmpjbktZY0ZPCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
